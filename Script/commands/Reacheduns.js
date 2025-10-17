@@ -1,33 +1,25 @@
-import React, { useState } from 'react';
+const axios = require('axios');
 
-function MessagingComponent() {
-  const [message, setMessage] = useState('💝');
-  const [file, setFile] = useState(null);
+module.exports.config = {
+  name: "react_unsend",
+  version: "1.0",
+  hasPermission: 0,
+  credits: "Credit",
+  description: "React to unsend link",
+  commandCategory: "system",
+  usages: "",
+  cooldowns: 0
+};
 
-  const handleSendMessage = () => {
-    // Logic to send the message
-    console.log('Message sent:', message);
-    setMessage('');
-  };
+module.exports.run = async function({ api, event }) {
+  if (event.type == "message_reaction" && event.reaction == "👍") {
+    const messageId = event.messageId;
+    const message = await api.getMessage(messageId);
+    const messageText = message.body;
 
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
-  };
-
-  return (
-    <div>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type a message"
-      />
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleSendMessage}>Send</button>
-      {file && <p>File selected: {file.name}</p>}
-    </div>
-  );
-}
-
-export default MessagingComponent;
-  
+    // Check if the message contains a link
+    if (messageText.includes("http")) {
+      api.unsendMessage(messageId);
+    }
+  }
+};
